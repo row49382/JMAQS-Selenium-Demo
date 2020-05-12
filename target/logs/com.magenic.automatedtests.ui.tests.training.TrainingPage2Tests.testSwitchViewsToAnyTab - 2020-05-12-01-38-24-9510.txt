@@ -1,0 +1,21 @@
+
+1589247504955
+INFORMATION:	Setup test object for com.magenic.automatedtests.ui.tests.training.TrainingPage2Tests.testSwitchViewsToAnyTab
+
+1589247506728
+INFORMATION:	Local driver: Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 81.0.4044.138, chrome: {chromedriverVersion: 80.0.3987.16 (320f6526c1632..., userDataDir: C:\Users\robertw\AppData\Lo...}, goog:chromeOptions: {debuggerAddress: localhost:54352}, javascriptEnabled: true, networkConnectionEnabled: false, pageLoadStrategy: normal, platform: WINDOWS, platformName: WINDOWS, proxy: Proxy(), setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify}
+
+1589247517454
+SUCCESS:	Test Passed
+
+1589247517454
+VERBOSE:	Start dispose
+
+1589247517455
+VERBOSE:	Start dispose driver
+
+1589247518066
+VERBOSE:	End dispose driver
+
+1589247518067
+VERBOSE:	End dispose
