@@ -1,3 +1,0 @@
-
-1589244106113
-INFORMATION:	Setup test object for com.magenic.automatedtests.ui.tests.training.TrainingPage2Tests.testSwitchViewsToAnyTab

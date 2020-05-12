@@ -10,8 +10,6 @@ Rsrc/test/java/com/magenic/automatedtests/ui/tests/training/TrainingPage2Tests.j
 Rsrc/test/java/com/magenic/automatedtests/ui/tests/training/TrainingPage1Tests.java,4\c\4c481c5ff3259c7bf93044342f9f42cc8584bc37
 z
 Jsrc/test/java/com/magenic/automatedtests/ui/pageobjectmodels/BasePage.java,2\7\279275bbdaa420bd193700ca7828fe813c49d104
-„
-Tsrc/test/java/com/magenic/automatedtests/ui/tests/training/BaseTrainingPageTest.java,c\f\cf012e429535a76ae0acf5001f98577585db28c9
 ˆ
 Xsrc/test/java/com/magenic/automatedtests/ui/pageobjectmodels/training/BaseLoginPage.java,7\d\7d272654b1e52dc66e6c9a23a1fb974eafbe4856
 “
