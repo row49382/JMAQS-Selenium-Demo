@@ -1,16 +1,20 @@
 package com.magenic.automatedtests.ui.pageobjectmodels.page_elements;
 
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.BootstrapModalWindow;
+import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DatePicker;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DialogOneWindow;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DialogTwoWindow;
-import com.magenic.automatedtests.ui.pageobjectmodels.training.page3.ErrorPage;
+import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.BaseErrorPage;
+import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.NoErrorPage;
+import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.PageElementErrorPage;
 import com.magenic.jmaqs.selenium.BaseSeleniumPageModel;
 import com.magenic.jmaqs.selenium.LazyWebElement;
+import com.magenic.jmaqs.selenium.SeleniumConfig;
 import com.magenic.jmaqs.selenium.SeleniumTestObject;
+import com.magenic.jmaqs.selenium.factories.UIWaitFactory;
 import com.magenic.jmaqs.utilities.helper.exceptions.ExecutionFailedException;
 import com.magenic.jmaqs.utilities.helper.exceptions.TimeoutException;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -85,13 +89,30 @@ public class PageElementsPage extends BaseSeleniumPageModel {
         return this.getLazyElement(By.cssSelector("#droppable2 > p > #DROPPED"));
     }
 
+    public LazyWebElement getDatePickerButton() {
+        return this.getLazyElement(By.cssSelector("img.ui-datepicker-trigger"));
+    }
+
+    public LazyWebElement getDatePickerInput() {
+        return this.getLazyElement(By.cssSelector("input#datepicker"));
+    }
+
     public PageElementsPage(SeleniumTestObject testObject) {
         super(testObject);
     }
 
-    public ErrorPage clickErrorPageLink() throws InterruptedException, TimeoutException, ExecutionFailedException {
+    public BaseErrorPage clickErrorPageLink() throws InterruptedException, TimeoutException, ExecutionFailedException {
         this.getErrorLinkElement().click();
-        return new ErrorPage(this.getTestObject());
+        BaseErrorPage errorPage;
+
+        if (UIWaitFactory.getWaitDriver(this.getWebDriver()).waitForVisibleElement(By.cssSelector(".navbar-header")) != null) {
+            errorPage = new NoErrorPage(this.getTestObject());
+        }
+        else {
+            errorPage = new PageElementErrorPage(this.getTestObject());
+        }
+
+        return errorPage;
     }
 
     public AsyncPage clickAsyncPageLink() throws InterruptedException, TimeoutException, ExecutionFailedException {
@@ -112,6 +133,11 @@ public class PageElementsPage extends BaseSeleniumPageModel {
     public BootstrapModalWindow clickBootstrapModalButton() throws InterruptedException, TimeoutException, ExecutionFailedException {
         this.getBoostrapModelElement().click();
         return new BootstrapModalWindow(this.getTestObject());
+    }
+
+    public DatePicker clickDatePickerButton() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        this.getDatePickerButton().click();
+        return new DatePicker(this.getTestObject());
     }
 
     public void moveDragAndDropToTarget(DragAndDropType type) {

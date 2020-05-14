@@ -3,16 +3,21 @@ package com.magenic.automatedtests.ui.tests.page_elements;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.AsyncPage;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.PageElementsPage;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.BootstrapModalWindow;
+import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DatePicker;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DialogOneWindow;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DialogTwoWindow;
+import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.BaseErrorPage;
 import com.magenic.jmaqs.selenium.BaseSeleniumTest;
 import com.magenic.jmaqs.selenium.SeleniumConfig;
 import com.magenic.jmaqs.selenium.factories.UIWaitFactory;
 import com.magenic.jmaqs.utilities.helper.exceptions.ExecutionFailedException;
 import com.magenic.jmaqs.utilities.helper.exceptions.TimeoutException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.time.Month;
 
 public class PageElementTests extends BaseSeleniumTest {
     private final String pageElementsPath = "Automation";
@@ -29,11 +34,13 @@ public class PageElementTests extends BaseSeleniumTest {
         Assert.assertTrue(pageElementsPage.isPageLoaded());
     }
 
-//    @Test
-//    public void testErrorPageLoadsFromLink() {
-//        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
-//        pageElementsPage.clickErrorPageLink();
-//    }
+    @Test(enabled = false)
+    public void testErrorPageLoadsFromLink() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        BaseErrorPage errorPage = pageElementsPage.clickErrorPageLink();
+
+        Assert.assertTrue(errorPage.isPageLoaded());
+    }
 
     @Test
     public void testAsyncPageLoadsFromLink() throws InterruptedException, TimeoutException, ExecutionFailedException {
@@ -160,5 +167,83 @@ public class PageElementTests extends BaseSeleniumTest {
         Assert.assertTrue(pageElementsPage.isHtml4DragAndDropOnElement(
                 pageElementsPage.getHtml4StartDragAndDropBoxElement(),
                 pageElementsPage.getHtml4StartDragAndDropText()));
+    }
+
+    @Test
+    public void testDatePickerLoads() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        pageElementsPage.isPageLoaded();
+
+        DatePicker dp = pageElementsPage.clickDatePickerButton();
+
+        Assert.assertTrue(dp.isPageLoaded());
+    }
+
+    @Test
+    public void testSetDatePickerMonth() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        pageElementsPage.isPageLoaded();
+
+        DatePicker dp = pageElementsPage.clickDatePickerButton();
+        dp.isPageLoaded();
+
+        dp.setMonth(Month.FEBRUARY);
+
+        Assert.assertTrue(dp.getCurrentMonth().getText().equalsIgnoreCase(Month.FEBRUARY.toString()));
+    }
+
+    @Test
+    public void testSetDatePickerYear() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        pageElementsPage.isPageLoaded();
+
+        DatePicker dp = pageElementsPage.clickDatePickerButton();
+        dp.isPageLoaded();
+
+        dp.setYear(2018);
+
+        Assert.assertEquals(Integer.parseInt(dp.getCurrentYear().getText()), 2018);
+    }
+
+    @Test
+    public void testSetDatePickerDay() throws Exception {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        pageElementsPage.isPageLoaded();
+
+        DatePicker dp = pageElementsPage.clickDatePickerButton();
+        dp.isPageLoaded();
+
+        dp.setMonth(Month.MARCH);
+        dp.setDay(8);
+
+        String day = ((String)((JavascriptExecutor) this.getWebDriver())
+                .executeScript("return document.getElementById('datepicker').value"))
+                .split("/")[1];
+
+        Assert.assertEquals("08", day);
+    }
+
+    @Test
+    public void testSetDatePickerFullCompleteDate() throws Exception {
+        String expectedDate = "10/02/2016";
+
+        Month month = Month.OCTOBER;
+        int day = 2;
+        int year = 2016;
+
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        pageElementsPage.isPageLoaded();
+
+        DatePicker dp = pageElementsPage.clickDatePickerButton();
+        dp.isPageLoaded();
+
+        dp.setYear(year);
+        dp.setMonth(month);
+        dp.setDay(day);
+
+        String actualDate = ((String)((JavascriptExecutor) this.getWebDriver())
+                .executeScript("return document.getElementById('datepicker').value"));
+
+        Assert.assertEquals(expectedDate, actualDate);
     }
 }
