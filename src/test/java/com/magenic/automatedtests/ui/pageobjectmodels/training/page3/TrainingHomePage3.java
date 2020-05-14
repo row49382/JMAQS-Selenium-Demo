@@ -1,19 +1,38 @@
-package com.magenic.automatedtests.ui.pageobjectmodels.training.page2;
+package com.magenic.automatedtests.ui.pageobjectmodels.training.page3;
 
-import com.magenic.automatedtests.ui.pageobjectmodels.training.BaseHomePage;
 import com.magenic.automatedtests.ui.pageobjectmodels.training.enums.TrainingTabView;
+import com.magenic.automatedtests.ui.pageobjectmodels.training.page2.TrainingHomePage2;
 import com.magenic.jmaqs.selenium.SeleniumTestObject;
 import com.magenic.jmaqs.selenium.factories.UIWaitFactory;
+import com.magenic.jmaqs.utilities.helper.GenericWait;
+import com.magenic.jmaqs.utilities.helper.exceptions.TimeoutException;
 import org.openqa.selenium.By;
+import org.testng.Assert;
 
-public class TrainingHomePage2 extends BaseHomePage {
-    protected By howDoesItWorkPageTabLocator = By.cssSelector("input#HowWork");
-    protected By asyncpageTabLocator = By.cssSelector("input#Async");
-    protected By howDoesItWorkPageTabWindowLocator = By.cssSelector("input#HowWork");
-    protected By asyncpageTabWindowLocator = By.cssSelector("#AsyncContent");
+public class TrainingHomePage3 extends TrainingHomePage2 {
+    private By homepageTabLocator = By.cssSelector("input#HomePage");
+    private By errorPageLocator = By.cssSelector("#ErrorPagePage");
+    private By errorTabContentLocator = By.cssSelector("#NoError");
+    private By aboutpageTabLocator = By.cssSelector("input#AboutPage");
+    private By asyncpageTabLocator = By.cssSelector("input#AsyncPage");
+    private By howDoesItWorkPageTabLocator = By.cssSelector("input#HowWorkPage");
+    private By howDoesItWorkPageTabWindowLocator = By.cssSelector("p#HowWorks");
 
-    protected TrainingHomePage2(SeleniumTestObject testObject) {
+    protected TrainingHomePage3(SeleniumTestObject testObject) {
         super(testObject);
+    }
+
+    public ErrorPage swapToErrorPage() throws InterruptedException, TimeoutException {
+        ErrorPage errorPage = new ErrorPage(this.testObject);
+
+        GenericWait.waitFor(() -> {
+                    this.testObject.getWebDriver().findElement(this.errorPageLocator).click();
+                    Assert.assertTrue(errorPage.isPageLoaded());
+
+                    return true;
+                });
+
+        return errorPage;
     }
 
     /**
@@ -37,6 +56,10 @@ public class TrainingHomePage2 extends BaseHomePage {
             }
             case HOW_IT_WORKS: {
                 this.testObject.getWebDriver().findElement(this.howDoesItWorkPageTabLocator).click();
+                break;
+            }
+            case ERROR: {
+                this.testObject.getWebDriver().findElement(this.errorPageLocator).click();
                 break;
             }
             default :
@@ -75,11 +98,21 @@ public class TrainingHomePage2 extends BaseHomePage {
                         .waitUntilVisibleElement(this.howDoesItWorkPageTabWindowLocator);
                 break;
             }
+            case ERROR: {
+                isInView = UIWaitFactory.getWaitDriver(this.testObject.getWebDriver())
+                        .waitUntilVisibleElement(this.errorTabContentLocator);
+                break;
+            }
             default :
                 throw new Exception(
                         String.format("view option %s provided is not supported for this page", viewOption.toString()));
         }
 
         return isInView;
+    }
+
+    @Override
+    public boolean isPageLoaded() {
+        return UIWaitFactory.getWaitDriver(this.testObject.getWebDriver()).waitUntilVisibleElement(this.homepageTabLocator);
     }
 }

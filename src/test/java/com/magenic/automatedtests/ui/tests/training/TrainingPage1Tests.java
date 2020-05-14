@@ -5,7 +5,8 @@ import com.magenic.automatedtests.ui.pageobjectmodels.training.page1.TrainingLog
 import com.magenic.automatedtests.ui.pageobjectmodels.training.enums.TrainingTabView;
 import com.magenic.jmaqs.selenium.BaseSeleniumTest;
 import com.magenic.jmaqs.selenium.SeleniumConfig;
-import com.magenic.jmaqs.utilities.helper.TimeoutException;
+import com.magenic.jmaqs.selenium.factories.UIWaitFactory;
+import com.magenic.jmaqs.utilities.helper.exceptions.TimeoutException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -16,6 +17,7 @@ public class TrainingPage1Tests extends BaseSeleniumTest {
     @BeforeMethod
     public void navigateToStartPage() {
         this.getWebDriver().navigate().to(SeleniumConfig.getWebSiteBase() + trainingPagePath);
+        UIWaitFactory.getWaitDriver(this.getWebDriver()).waitForPageLoad();
     }
 
     @Test

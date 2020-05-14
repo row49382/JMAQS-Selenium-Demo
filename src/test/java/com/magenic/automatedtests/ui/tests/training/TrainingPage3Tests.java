@@ -1,20 +1,20 @@
 package com.magenic.automatedtests.ui.tests.training;
 
 import com.magenic.automatedtests.ui.pageobjectmodels.training.enums.TrainingTabView;
-import com.magenic.automatedtests.ui.pageobjectmodels.training.page2.TrainingHomePage2;
-import com.magenic.automatedtests.ui.pageobjectmodels.training.page2.TrainingLoginPage2;
+import com.magenic.automatedtests.ui.pageobjectmodels.training.page3.ErrorPage;
+import com.magenic.automatedtests.ui.pageobjectmodels.training.page3.TrainingHomePage3;
+import com.magenic.automatedtests.ui.pageobjectmodels.training.page3.TrainingLoginPage3;
 import com.magenic.jmaqs.selenium.BaseSeleniumTest;
 import com.magenic.jmaqs.selenium.SeleniumConfig;
 import com.magenic.jmaqs.utilities.helper.exceptions.TimeoutException;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
-public class TrainingPage2Tests extends BaseSeleniumTest {
-    private final String trainingPagePath = "Static/Training2/loginpage.html";
+public class TrainingPage3Tests extends BaseSeleniumTest {
+    private final String trainingPagePath = "Static/Training3/loginpage.html";
 
     @DataProvider(name = "TabOptions")
     public static Object[][] getTabOptions() {
@@ -22,7 +22,8 @@ public class TrainingPage2Tests extends BaseSeleniumTest {
                 { "HOME" },
                 { "ABOUT" },
                 { "ASYNC_PAGE" },
-                { "HOW_IT_WORKS" }
+                { "HOW_IT_WORKS" },
+                { "ERROR" }
         };
     }
 
@@ -36,8 +37,8 @@ public class TrainingPage2Tests extends BaseSeleniumTest {
         String username = "Ted";
         String password = "123";
 
-        TrainingLoginPage2 loginPage = new TrainingLoginPage2(this.getTestObject());
-        TrainingHomePage2 homePage = loginPage.loginSuccess(username, password);
+        TrainingLoginPage3 loginPage = new TrainingLoginPage3(this.getTestObject());
+        TrainingHomePage3 homePage = loginPage.loginSuccess(username, password);
 
         Assert.assertTrue(homePage.isPageLoaded());
     }
@@ -47,7 +48,7 @@ public class TrainingPage2Tests extends BaseSeleniumTest {
         String invalidUsername = "det";
         String password = "123";
 
-        TrainingLoginPage2 loginPage = new TrainingLoginPage2(this.getTestObject());
+        TrainingLoginPage3 loginPage = new TrainingLoginPage3(this.getTestObject());
         String errorMessage = loginPage.loginInvalid(invalidUsername, password);
 
         Assert.assertNotNull(errorMessage);
@@ -55,17 +56,26 @@ public class TrainingPage2Tests extends BaseSeleniumTest {
     }
 
     @Test
-    public void testHomePageTabStartsOnHome() throws Exception {
-        TrainingHomePage2 homePage = this.login();
-        Assert.assertTrue(homePage.isTabInView(TrainingTabView.HOME));
+    public void testErrorPageLoads() throws Exception {
+        TrainingHomePage3 homePage = this.login();
+        ErrorPage errorPage = homePage.swapToErrorPage();
+
+        Assert.assertTrue(errorPage.isPageLoaded());
     }
 
     @Test(enabled = false, dataProvider = "TabOptions")
     public void testSwitchViewsToAnyTab(String option) throws Exception {
         TrainingTabView tabOption = Enum.valueOf(TrainingTabView.class, option);
 
-        TrainingHomePage2 homePage = this.login();
+        TrainingHomePage3 homePage = this.login();
         homePage.switchTabViews(tabOption);
+
+        while (!homePage.isTabInView(tabOption) && option.equalsIgnoreCase("ERROR")) {
+            this.getTestObject().getWebDriver().navigate().back();
+            if (homePage.isPageLoaded()) {
+                homePage.switchTabViews(tabOption);
+            }
+        }
 
         Assert.assertTrue(homePage.isTabInView(tabOption));
     }
@@ -76,13 +86,25 @@ public class TrainingPage2Tests extends BaseSeleniumTest {
     public void testSwitchViewsToAnyTab() throws Exception {
         SoftAssert sa = new SoftAssert();
         Object[][] options = getTabOptions();
-        TrainingHomePage2 homePage = this.login();
+        TrainingHomePage3 homePage = this.login();
 
         for (int i = 0; i < options.length; i++) {
             TrainingTabView tabOption = Enum.valueOf(TrainingTabView.class, (String)options[i][0]);
             homePage.switchTabViews(tabOption);
 
-            sa.assertTrue(homePage.isTabInView(tabOption));
+            // since the error page can randomly load a new page, swap back
+            // to the home page so that any remainder tab is back in view
+            // and the error tab can be verified
+            while (!homePage.isTabInView(tabOption) && ((String) options[i][0]).equalsIgnoreCase("ERROR")) {
+                this.getTestObject().getWebDriver().navigate().back();
+                if (homePage.isPageLoaded()) {
+                    homePage.switchTabViews(tabOption);
+                }
+            }
+
+            sa.assertTrue(
+                    homePage.isTabInView(tabOption),
+                    String.format("failed to load tab for option %s", tabOption));
         }
 
         sa.assertAll();
@@ -93,12 +115,12 @@ public class TrainingPage2Tests extends BaseSeleniumTest {
      * @return The loaded homepage
      * @throws Exception If the homepage fails to load
      */
-    protected TrainingHomePage2 login() throws Exception {
+    protected TrainingHomePage3 login() throws Exception {
         String username = "Ted";
         String password = "123";
 
-        TrainingLoginPage2 loginPage = new TrainingLoginPage2(this.getTestObject());
-        TrainingHomePage2 homePage = loginPage.loginSuccess(username, password);
+        TrainingLoginPage3 loginPage = new TrainingLoginPage3(this.getTestObject());
+        TrainingHomePage3 homePage = loginPage.loginSuccess(username, password);
 
         if (!homePage.isPageLoaded()) {
             throw new Exception("home page failed to load");

@@ -4,7 +4,7 @@ import com.magenic.automatedtests.ui.pageobjectmodels.BasePage;
 import com.magenic.jmaqs.selenium.SeleniumTestObject;
 import com.magenic.jmaqs.selenium.factories.UIWaitFactory;
 import com.magenic.jmaqs.utilities.helper.GenericWait;
-import com.magenic.jmaqs.utilities.helper.TimeoutException;
+import com.magenic.jmaqs.utilities.helper.exceptions.TimeoutException;
 import org.openqa.selenium.By;
 
 public abstract class BaseLoginPage extends BasePage {
@@ -24,7 +24,7 @@ public abstract class BaseLoginPage extends BasePage {
                 .waitUntilVisibleElement(this.trainingLoginPageLocator);
     }
 
-    protected  void login(String username, String pass) {
+    protected void login(String username, String pass) {
         this.testObject.getWebDriver().findElement(this.userNameLocator).sendKeys(username);
         this.testObject.getWebDriver().findElement(this.passwordLocator).sendKeys(pass);
 
@@ -37,5 +37,11 @@ public abstract class BaseLoginPage extends BasePage {
                         .getText()
                         .isEmpty()
         );
+    }
+
+    public String loginInvalid(String username, String pass) throws TimeoutException, InterruptedException {
+        this.login(username, pass);
+        this.waitForErrorMessage();
+        return this.testObject.getWebDriver().findElement(loginFailedTextLocator).getText();
     }
 }

@@ -4,5 +4,6 @@ public enum TrainingTabView {
     HOME,
     ABOUT,
     HOW_IT_WORKS,
-    ASYNC_PAGE
+    ASYNC_PAGE,
+    ERROR
 }
