@@ -17,6 +17,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.time.Month;
 
 public class PageElementTests extends BaseSeleniumTest {
@@ -132,21 +133,19 @@ public class PageElementTests extends BaseSeleniumTest {
         Assert.assertFalse(bootstrapModalWindow.isPageLoaded());
     }
 
-    // Selenium does not support HTML5 drag and drop natively. We will need to
-    // find a solution via javascript
-    @Test(enabled = false)
-    public void testHtml5DragAndDropStartToTarget() {
+    @Test
+    public void testHtml5DragAndDropStartToTarget() throws IOException {
         PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
         pageElementsPage.isPageLoaded();
 
         pageElementsPage.moveDragAndDropToTarget(PageElementsPage.DragAndDropType.HTML5);
 
         Assert.assertTrue(pageElementsPage.isHtml5DragAndDropOnElement(
-                pageElementsPage.getHtml5DragAndDropBoxElement()));
+                pageElementsPage.getHtml5TargetDragAndDropBoxElement()));
     }
 
     @Test
-    public void testHtml4DragAndDropToTarget() {
+    public void testHtml4DragAndDropToTarget() throws IOException {
         PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
         pageElementsPage.isPageLoaded();
 
@@ -158,7 +157,7 @@ public class PageElementTests extends BaseSeleniumTest {
     }
 
     @Test
-    public void testHtml4DragAndDropToStart() {
+    public void testHtml4DragAndDropToStart() throws IOException {
         PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
         pageElementsPage.isPageLoaded();
 

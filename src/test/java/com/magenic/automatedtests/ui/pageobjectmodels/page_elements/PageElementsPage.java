@@ -7,16 +7,19 @@ import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.D
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.BaseErrorPage;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.NoErrorPage;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.PageElementErrorPage;
+import com.magenic.automatedtests.ui.support.FileUtil;
 import com.magenic.jmaqs.selenium.BaseSeleniumPageModel;
 import com.magenic.jmaqs.selenium.LazyWebElement;
-import com.magenic.jmaqs.selenium.SeleniumConfig;
 import com.magenic.jmaqs.selenium.SeleniumTestObject;
 import com.magenic.jmaqs.selenium.factories.UIWaitFactory;
 import com.magenic.jmaqs.utilities.helper.exceptions.ExecutionFailedException;
 import com.magenic.jmaqs.utilities.helper.exceptions.TimeoutException;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+
+import java.io.IOException;
 
 public class PageElementsPage extends BaseSeleniumPageModel {
     public enum DragAndDropType { HTML4, HTML5 }
@@ -140,56 +143,67 @@ public class PageElementsPage extends BaseSeleniumPageModel {
         return new DatePicker(this.getTestObject());
     }
 
-    public void moveDragAndDropToTarget(DragAndDropType type) {
-        WebElement source;
-        WebElement target;
-
+    public void moveDragAndDropToTarget(DragAndDropType type) throws IOException {
         switch (type) {
             case HTML4: {
-                source = this.getHtml4DragAndDropBoxElement().getRawExistingElement();
-                target = this.getHtml4TargetDragAndDropBoxElement().getRawExistingElement();
+                this.moveDragAndDrop(type, this.getHtml4TargetDragAndDropBoxElement());
                 break;
             }
             case HTML5: {
-                source = this.getHtml5DragAndDropBoxElement().getRawExistingElement();
-                target = this.getHtml5TargetDragAndDropBoxElement().getRawExistingElement();
+                this.moveDragAndDrop(type, this.getHtml5TargetDragAndDropBoxElement());
                 break;
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + type);
         }
-
-        Actions action = new Actions(this.getWebDriver());
-        action.dragAndDrop(
-                source, target)
-                .build()
-                .perform();
-
     }
 
-    public void moveDragAndDropToStart(DragAndDropType type) {
-        WebElement target;
-        WebElement source;
-
+    public void moveDragAndDropToStart(DragAndDropType type) throws IOException {
         switch (type) {
             case HTML4: {
-                source = this.getHtml4DragAndDropBoxElement().getRawExistingElement();
-                target = this.getHtml4StartDragAndDropBoxElement().getRawExistingElement();
+                this.moveDragAndDrop(type, this.getHtml4StartDragAndDropBoxElement());
                 break;
             }
             case HTML5: {
-                source = this.getHtml5DragAndDropBoxElement().getRawExistingElement();
-                target = this.getHtml5StartDragAndDropBoxElement().getRawExistingElement();
+                this.moveDragAndDrop(type, this.getHtml5StartDragAndDropBoxElement());
                 break;
             }
             default:
                 throw new IllegalStateException("Unexpected value: " + type);
         }
+    }
 
-        Actions action = new Actions(this.getWebDriver());
-        action.dragAndDrop(source, target)
-                .build()
-                .perform();
+    private void moveDragAndDrop(DragAndDropType type, LazyWebElement target) throws IOException {
+        LazyWebElement source;
+
+        switch (type) {
+            case HTML4: {
+                source = this.getHtml4DragAndDropBoxElement();
+
+                Actions action = new Actions(this.getWebDriver());
+                action.dragAndDrop(source.getRawExistingElement(), target.getRawExistingElement())
+                        .build()
+                        .perform();
+                break;
+            }
+            case HTML5: {
+                // HTML5 drag and drop is not supported by selenium,
+                // we need to use the javascript file to do so
+                source = this.getHtml5DragAndDropBoxElement();
+
+                String javascript = FileUtil.readFile("drag_and_drop_helper.js");
+
+                ((JavascriptExecutor)this.getWebDriver())
+                        .executeScript(
+                                javascript + "simulateHTML5DragAndDrop(arguments[0], arguments[1])",
+                                source.getRawExistingElement(),
+                                target.getRawExistingElement());
+
+                break;
+            }
+            default:
+                throw new IllegalStateException("Unexpected value: " + type);
+        }
     }
 
     public boolean isHtml5DragAndDropOnElement(LazyWebElement element) {
