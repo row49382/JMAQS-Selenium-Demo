@@ -8,6 +8,10 @@
     <artifactId>automation-site-tests</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <properties>
+        <UITestPath>${project.build.testSourceDirectory}/com/magenic/automatedtests/ui</UITestPath>
+    </properties>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.magenic.jmaqs.selenium/jmaqs-selenium -->
         <dependency>
@@ -24,6 +28,16 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M4</version>
+                <configuration>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>${UITestPath}/tests/testng-parallel.xml</suiteXmlFile>
+                    </suiteXmlFiles>
                 </configuration>
             </plugin>
             <plugin>
