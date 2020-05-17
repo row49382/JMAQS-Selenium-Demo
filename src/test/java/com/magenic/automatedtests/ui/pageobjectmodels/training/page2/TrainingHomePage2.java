@@ -5,12 +5,14 @@ import com.magenic.automatedtests.ui.pageobjectmodels.training.enums.TrainingTab
 import com.magenic.jmaqs.selenium.SeleniumTestObject;
 import com.magenic.jmaqs.selenium.factories.UIWaitFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.Select;
 
 public class TrainingHomePage2 extends BaseHomePage {
     protected By howDoesItWorkPageTabLocator = By.cssSelector("input#HowWork");
     protected By asyncpageTabLocator = By.cssSelector("input#Async");
     protected By howDoesItWorkPageTabWindowLocator = By.cssSelector("input#HowWork");
     protected By asyncpageTabWindowLocator = By.cssSelector("#AsyncContent");
+    protected By asyncpageSelectorLocator = By.cssSelector("select#Selector");
 
     protected TrainingHomePage2(SeleniumTestObject testObject) {
         super(testObject);
@@ -81,5 +83,9 @@ public class TrainingHomePage2 extends BaseHomePage {
         }
 
         return isInView;
+    }
+
+    public Select getAsyncPageSelectOption() {
+        return new Select(this.testObject.getWebDriver().findElement(this.asyncpageSelectorLocator));
     }
 }

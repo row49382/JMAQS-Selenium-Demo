@@ -17,6 +17,13 @@ public class FileUtil {
         return readFile(ROOT, fileName);
     }
 
+    /**
+     * Attempts to read the file recursively from the root directory provided.
+     * @param root
+     * @param fileName
+     * @return
+     * @throws IOException If the file does not exist at the root provided
+     */
     public static String readFile(String root, String fileName) throws IOException {
         StringBuffer buffer = new StringBuffer();
 
@@ -26,18 +33,18 @@ public class FileUtil {
                 100,
                 (path, basicFileAttributes) -> {
                     File file = path.toFile();
-                    return !file.isDirectory() &&
-                            file.getName().equalsIgnoreCase(fileName);
+                    return file.getName().equalsIgnoreCase(fileName);
         });
 
-        BufferedReader br = new BufferedReader(
+        try (BufferedReader br = new BufferedReader(
                 new FileReader(
                         filePath.findFirst()
                                 .orElseThrow(FileNotFoundException::new)
-                                .toString()));
+                                .toString()))) {
 
-        while((line = br.readLine())!=null) {
-            buffer.append(line);
+            while ((line = br.readLine()) != null) {
+                buffer.append(line);
+            }
         }
 
         return buffer.toString();

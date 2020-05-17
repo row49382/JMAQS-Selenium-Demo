@@ -6,12 +6,18 @@ import com.magenic.automatedtests.ui.pageobjectmodels.training.page2.TrainingLog
 import com.magenic.jmaqs.selenium.BaseSeleniumTest;
 import com.magenic.jmaqs.selenium.SeleniumConfig;
 import com.magenic.jmaqs.utilities.helper.exceptions.TimeoutException;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
+
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class TrainingPage2Tests extends BaseSeleniumTest {
     private final String trainingPagePath = "Static/Training2/loginpage.html";
@@ -86,6 +92,64 @@ public class TrainingPage2Tests extends BaseSeleniumTest {
         }
 
         sa.assertAll();
+    }
+
+    @Test
+    public void testAsyncPageSelectOptions() throws Exception {
+        TrainingHomePage2 homePage = this.login();
+        homePage.switchTabViews(TrainingTabView.ASYNC_PAGE);
+        homePage.isTabInView(TrainingTabView.ASYNC_PAGE);
+
+        Stream<String> expectedSelectOptions = Stream.of("First", "Second", "Third");
+        Select select = homePage.getAsyncPageSelectOption();
+        Supplier<Stream<String>> actualSelectOptions =
+                () -> select.getOptions().stream().map(WebElement::getText);
+        SoftAssert sa = new SoftAssert();
+
+        expectedSelectOptions.forEach(
+                expectedOption -> sa.assertTrue(actualSelectOptions
+                        .get()
+                        .anyMatch(actualOption -> expectedOption.equalsIgnoreCase(actualOption))));
+
+        sa.assertAll();
+    }
+
+    @Test
+    public void testAsyncPageDefaultSelectOptionIsFirst() throws Exception {
+        TrainingHomePage2 homePage = this.login();
+        homePage.switchTabViews(TrainingTabView.ASYNC_PAGE);
+        homePage.isTabInView(TrainingTabView.ASYNC_PAGE);
+
+        Select select = homePage.getAsyncPageSelectOption();
+
+        Assert.assertEquals(select.getFirstSelectedOption().getText(), "First");
+    }
+    @Test
+    public void testAsyncPageSetSelectOptionIsSetAsSelected() throws Exception {
+        TrainingHomePage2 homePage = this.login();
+        homePage.switchTabViews(TrainingTabView.ASYNC_PAGE);
+        homePage.isTabInView(TrainingTabView.ASYNC_PAGE);
+
+        Select select = homePage.getAsyncPageSelectOption();
+        Stream<String> expectedSelectOptions = Stream.of("First", "Second", "Third");
+
+        SoftAssert sa = new SoftAssert();
+        expectedSelectOptions.forEach(expectedOption -> {
+            select.selectByVisibleText(expectedOption);
+            sa.assertEquals(select.getFirstSelectedOption().getText(), expectedOption);
+        });
+
+        sa.assertAll();
+    }
+
+    @Test(expectedExceptions = NoSuchElementException.class)
+    public void testAsyncPageSelectOptionThatIsInvalid() throws Exception {
+        TrainingHomePage2 homePage = this.login();
+        homePage.switchTabViews(TrainingTabView.ASYNC_PAGE);
+        homePage.isTabInView(TrainingTabView.ASYNC_PAGE);
+
+        Select select = homePage.getAsyncPageSelectOption();
+        select.selectByValue("Invalid_Option");
     }
 
     /**
