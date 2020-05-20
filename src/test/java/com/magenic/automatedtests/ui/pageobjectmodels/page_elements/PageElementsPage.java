@@ -4,6 +4,8 @@ import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.B
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DatePicker;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DialogOneWindow;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DialogTwoWindow;
+import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.Slider;
+import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.enums.AlertCloseOptions;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.BaseErrorPage;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.NoErrorPage;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.PageElementErrorPage;
@@ -52,8 +54,8 @@ public class PageElementsPage extends BaseSeleniumPageModel {
         return this.getLazyElement(By.cssSelector("#javascriptAlertButton"), "JavascriptAlertButton");
     }
 
-    public LazyWebElement getAlertWithConfirmElement() {
-        return this.getLazyElement(By.cssSelector("#javascriptConfirmAlertButton"), "JavascriptConfirmAlertButton");
+    public LazyWebElement getJavascriptAlertWithConfirmButton() {
+        return this.getLazyElement(By.cssSelector("#javascriptConfirmAlertButton"));
     }
 
     public LazyWebElement getBoostrapModelElement() {
@@ -98,6 +100,10 @@ public class PageElementsPage extends BaseSeleniumPageModel {
 
     public LazyWebElement getDatePickerInput() {
         return this.getLazyElement(By.cssSelector("input#datepicker"));
+    }
+
+    public LazyWebElement getSliderSpanElement() {
+        return this.getLazyElement(By.cssSelector("#slider > span"));
     }
 
     public PageElementsPage(SeleniumTestObject testObject) {
@@ -232,6 +238,31 @@ public class PageElementsPage extends BaseSeleniumPageModel {
         }
 
         return isDragAndDropOnElement;
+    }
+
+    public void clickJavaScriptAlertButton() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        this.getJavascriptAlertElement().click();
+    }
+
+    public void clickJavaScriptAlertWithConfirmButton() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        this.getJavascriptAlertWithConfirmButton().click();
+    }
+
+    public void closeJavaScriptAlert(AlertCloseOptions closeOption) {
+        switch (closeOption) {
+            case ACCEPT: {
+                this.getTestObject().getWebDriver().switchTo().alert().accept();
+                break;
+            }
+            case DISMISS: {
+                this.getTestObject().getWebDriver().switchTo().alert().dismiss();
+                break;
+            }
+        }
+    }
+
+    public Slider getSlider() {
+        return new Slider(this.getTestObject());
     }
 
     @Override

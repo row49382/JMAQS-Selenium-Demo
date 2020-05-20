@@ -6,6 +6,7 @@ import com.magenic.jmaqs.selenium.SeleniumTestObject;
 import com.magenic.jmaqs.selenium.factories.UIWaitFactory;
 import com.magenic.jmaqs.utilities.helper.exceptions.TimeoutException;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.Select;
 
 public class AsyncPage extends BaseSeleniumPageModel {
     public LazyWebElement getAsyncPageIdentifier() {
@@ -16,8 +17,16 @@ public class AsyncPage extends BaseSeleniumPageModel {
         return this.getLazyElement(By.cssSelector("#loading-div"));
     }
 
+    public LazyWebElement getSelectElement() {
+        return this.getLazyElement(By.cssSelector("select#Selector"));
+    }
+
     public AsyncPage(SeleniumTestObject testObject) {
         super(testObject);
+    }
+
+    public Select getSelect() {
+        return new Select(this.getSelectElement().getRawVisibleElement());
     }
 
     @Override
@@ -29,7 +38,7 @@ public class AsyncPage extends BaseSeleniumPageModel {
         }
     }
 
-    public boolean didAsyncLoadingDivDisappear() throws TimeoutException, InterruptedException {
+    public boolean didAsyncLoadingDivDisappear() {
         return UIWaitFactory.getWaitDriver(this.getTestObject().getWebDriver())
                 .waitUntilAttributeTextEquals(this.getLazyLoadingDiv().getBy(), "style", "display: none;");
     }
