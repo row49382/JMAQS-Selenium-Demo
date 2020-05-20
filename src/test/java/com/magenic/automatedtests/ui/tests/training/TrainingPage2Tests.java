@@ -66,7 +66,7 @@ public class TrainingPage2Tests extends BaseSeleniumTest {
         Assert.assertTrue(homePage.isTabInView(TrainingTabView.HOME));
     }
 
-    @Test(enabled = false, dataProvider = "TabOptions")
+    @Test(dataProvider = "TabOptions")
     public void testSwitchViewsToAnyTab(String option) throws Exception {
         TrainingTabView tabOption = Enum.valueOf(TrainingTabView.class, option);
 
@@ -74,24 +74,6 @@ public class TrainingPage2Tests extends BaseSeleniumTest {
         homePage.switchTabViews(tabOption);
 
         Assert.assertTrue(homePage.isTabInView(tabOption));
-    }
-
-    // There is a potential bug with using DataProviders with jmaqs currently. commenting out
-    // this test and using the one below till that is resolved.
-    @Test
-    public void testSwitchViewsToAnyTab() throws Exception {
-        SoftAssert sa = new SoftAssert();
-        Object[][] options = getTabOptions();
-        TrainingHomePage2 homePage = this.login();
-
-        for (int i = 0; i < options.length; i++) {
-            TrainingTabView tabOption = Enum.valueOf(TrainingTabView.class, (String)options[i][0]);
-            homePage.switchTabViews(tabOption);
-
-            sa.assertTrue(homePage.isTabInView(tabOption));
-        }
-
-        sa.assertAll();
     }
 
     @Test

@@ -1,7 +1,6 @@
 package com.magenic.automatedtests.ui.tests.training;
 
 import com.magenic.automatedtests.ui.pageobjectmodels.training.enums.TrainingTabView;
-import com.magenic.automatedtests.ui.pageobjectmodels.training.page2.TrainingHomePage2;
 import com.magenic.automatedtests.ui.pageobjectmodels.training.page3.ErrorPage;
 import com.magenic.automatedtests.ui.pageobjectmodels.training.page3.TrainingHomePage3;
 import com.magenic.automatedtests.ui.pageobjectmodels.training.page3.TrainingLoginPage3;
@@ -70,7 +69,7 @@ public class TrainingPage3Tests extends BaseSeleniumTest {
         Assert.assertTrue(errorPage.isPageLoaded());
     }
 
-    @Test(enabled = false, dataProvider = "TabOptions")
+    @Test(dataProvider = "TabOptions")
     public void testSwitchViewsToAnyTab(String option) throws Exception {
         TrainingTabView tabOption = Enum.valueOf(TrainingTabView.class, option);
 
@@ -85,36 +84,6 @@ public class TrainingPage3Tests extends BaseSeleniumTest {
         }
 
         Assert.assertTrue(homePage.isTabInView(tabOption));
-    }
-
-    // There is a potential bug with using DataProviders with jmaqs currently. commenting out
-    // this test and using the one below till that is resolved.
-    @Test
-    public void testSwitchViewsToAnyTab() throws Exception {
-        SoftAssert sa = new SoftAssert();
-        Object[][] options = getTabOptions();
-        TrainingHomePage3 homePage = this.login();
-
-        for (int i = 0; i < options.length; i++) {
-            TrainingTabView tabOption = Enum.valueOf(TrainingTabView.class, (String)options[i][0]);
-            homePage.switchTabViews(tabOption);
-
-            // since the error page can randomly load a new page, swap back
-            // to the home page so that any remainder tab is back in view
-            // and the error tab can be verified
-            while (!homePage.isTabInView(tabOption) && ((String) options[i][0]).equalsIgnoreCase("ERROR")) {
-                this.getTestObject().getWebDriver().navigate().back();
-                if (homePage.isPageLoaded()) {
-                    homePage.switchTabViews(tabOption);
-                }
-            }
-
-            sa.assertTrue(
-                    homePage.isTabInView(tabOption),
-                    String.format("failed to load tab for option %s", tabOption));
-        }
-
-        sa.assertAll();
     }
 
     @Test
