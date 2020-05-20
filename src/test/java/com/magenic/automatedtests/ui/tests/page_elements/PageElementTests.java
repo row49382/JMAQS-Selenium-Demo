@@ -6,19 +6,37 @@ import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.B
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DatePicker;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DialogOneWindow;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.DialogTwoWindow;
+import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components.Slider;
+import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.enums.AlertCloseOptions;
 import com.magenic.automatedtests.ui.pageobjectmodels.page_elements.error_pages.BaseErrorPage;
+import com.magenic.automatedtests.ui.pageobjectmodels.training.enums.TrainingTabView;
+import com.magenic.automatedtests.ui.pageobjectmodels.training.page3.TrainingHomePage3;
+import com.magenic.automatedtests.ui.support.FileUtil;
 import com.magenic.jmaqs.selenium.BaseSeleniumTest;
 import com.magenic.jmaqs.selenium.SeleniumConfig;
 import com.magenic.jmaqs.selenium.factories.UIWaitFactory;
 import com.magenic.jmaqs.utilities.helper.exceptions.ExecutionFailedException;
 import com.magenic.jmaqs.utilities.helper.exceptions.TimeoutException;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.time.Month;
+import java.util.EnumSet;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class PageElementTests extends BaseSeleniumTest {
     private final String pageElementsPath = "Automation";
@@ -145,6 +163,18 @@ public class PageElementTests extends BaseSeleniumTest {
     }
 
     @Test
+    public void testHtml5DragAndDropStartToTargetBackToStart() throws IOException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        pageElementsPage.isPageLoaded();
+
+        pageElementsPage.moveDragAndDropToTarget(PageElementsPage.DragAndDropType.HTML5);
+        pageElementsPage.moveDragAndDropToStart(PageElementsPage.DragAndDropType.HTML5);
+
+        Assert.assertTrue(pageElementsPage.isHtml5DragAndDropOnElement(
+                pageElementsPage.getHtml5StartDragAndDropBoxElement()));
+    }
+
+    @Test
     public void testHtml4DragAndDropToTarget() throws IOException {
         PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
         pageElementsPage.isPageLoaded();
@@ -241,8 +271,154 @@ public class PageElementTests extends BaseSeleniumTest {
         dp.setDay(day);
 
         String actualDate = ((String)((JavascriptExecutor) this.getWebDriver())
-                .executeScript("return document.getElementById('datepicker').value"));
+                .executeScript(
+                        "return arguments[0].value",
+                        pageElementsPage.getDatePickerInput().getRawExistingElement()));
 
         Assert.assertEquals(expectedDate, actualDate);
     }
+
+    @Test
+    public void testAsyncPageSelectOptions() throws Exception {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        AsyncPage asyncPage = pageElementsPage.clickAsyncPageLink();
+
+        Stream<String> expectedSelectOptions = Stream.of("First", "Second", "Third");
+        Select select = asyncPage.getSelect();
+        Supplier<Stream<String>> actualSelectOptions =
+                () -> select.getOptions().stream().map(WebElement::getText);
+        SoftAssert sa = new SoftAssert();
+
+        expectedSelectOptions.forEach(
+                expectedOption -> sa.assertTrue(actualSelectOptions
+                        .get()
+                        .anyMatch(actualOption -> expectedOption.equalsIgnoreCase(actualOption))));
+
+        sa.assertAll();
+    }
+
+    @Test
+    public void testAsyncPageDefaultSelectOptionIsFirst() throws Exception {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        AsyncPage asyncPage = pageElementsPage.clickAsyncPageLink();
+
+        Select select = asyncPage.getSelect();
+
+        Assert.assertEquals(select.getFirstSelectedOption().getText(), "First");
+    }
+
+    @Test
+    public void testAsyncPageSetSelectOptionIsSetAsSelected() throws Exception {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        AsyncPage asyncPage = pageElementsPage.clickAsyncPageLink();
+
+        Select select = asyncPage.getSelect();
+        Stream<String> expectedSelectOptions = Stream.of("First", "Second", "Third");
+
+        SoftAssert sa = new SoftAssert();
+        expectedSelectOptions.forEach(expectedOption -> {
+            select.selectByVisibleText(expectedOption);
+            sa.assertEquals(select.getFirstSelectedOption().getText(), expectedOption);
+        });
+
+        sa.assertAll();
+    }
+
+    @Test(expectedExceptions = NoSuchElementException.class)
+    public void testAsyncPageSelectOptionThatIsInvalid() throws Exception {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        AsyncPage asyncPage = pageElementsPage.clickAsyncPageLink();
+
+        Select select = asyncPage.getSelect();
+        select.selectByValue("Invalid_Option");
+    }
+
+    @Test
+    public void testCloseJavascriptAlertButton() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        pageElementsPage.clickJavaScriptAlertButton();
+
+        pageElementsPage.closeJavaScriptAlert(AlertCloseOptions.ACCEPT);
+        Alert alert = ExpectedConditions.alertIsPresent().apply(this.getWebDriver());
+
+        Assert.assertNull(alert);
+    }
+
+    @Test
+    public void testCloseJavaScriptAlertWithConfirmButton() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        Set<AlertCloseOptions> closeOptions = EnumSet.allOf(AlertCloseOptions.class);
+
+        SoftAssert sa = new SoftAssert();
+        for (AlertCloseOptions closeOption : closeOptions) {
+            pageElementsPage.clickJavaScriptAlertWithConfirmButton();
+            pageElementsPage.closeJavaScriptAlert(closeOption);
+            Alert alert = ExpectedConditions.alertIsPresent().apply(this.getWebDriver());
+
+            sa.assertNull(alert);
+        }
+
+        sa.assertAll();
+    }
+
+    @Test
+    public void testSliderValueIncrementsWhenShiftedRight() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        Slider slider = pageElementsPage.getSlider();
+
+        // make sure value can be incremented
+        if (slider.getCurrentValue() == 0) {
+            slider.shiftLeft();
+        }
+
+        int currentValue = slider.getCurrentValue();
+
+        slider.shiftRight();
+        int incrementedValue = slider.getCurrentValue();
+
+        Assert.assertEquals(incrementedValue - currentValue, 1);
+    }
+
+    @Test
+    public void testSliderValueDecrementsWhenShiftedLeft() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        Slider slider = pageElementsPage.getSlider();
+
+        // make sure value can be decremented
+        if (slider.getCurrentValue() == 0) {
+            slider.shiftRight();
+        }
+
+        int currentValue = slider.getCurrentValue();
+
+        slider.shiftLeft();
+        int decrementedValue = slider.getCurrentValue();
+
+        Assert.assertEquals(currentValue - decrementedValue, 1);
+    }
+
+    @Test
+    public void validateSliderMaxValue() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        Slider slider = pageElementsPage.getSlider();
+        slider.shiftMax();
+
+        int expectedMax = 10;
+        int actualMax = slider.getCurrentValue();
+
+        Assert.assertEquals(expectedMax, actualMax);
+    }
+
+    @Test
+    public void validateSliderMinValue() throws InterruptedException, TimeoutException, ExecutionFailedException {
+        PageElementsPage pageElementsPage = new PageElementsPage(this.getTestObject());
+        Slider slider = pageElementsPage.getSlider();
+        slider.shiftMin();
+
+        int expectedMin = 1;
+        int actualMin = slider.getCurrentValue();
+
+        Assert.assertEquals(expectedMin, actualMin);
+    }
+
 }
