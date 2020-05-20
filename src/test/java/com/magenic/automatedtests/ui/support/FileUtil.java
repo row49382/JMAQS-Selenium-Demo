@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 public class FileUtil {
     private static final String ROOT = "./src/test/java";
@@ -19,27 +19,20 @@ public class FileUtil {
 
     /**
      * Attempts to read the file recursively from the root directory provided.
-     * @param root
-     * @param fileName
-     * @return
+     * @param root The root directory to start finding the file
+     * @param fileName The name of the file to find
+     * @return The found file as a String
      * @throws IOException If the file does not exist at the root provided
      */
     public static String readFile(String root, String fileName) throws IOException {
         StringBuffer buffer = new StringBuffer();
-
         String line;
-        Stream<Path> filePath = Files.find(
-                Paths.get(root),
-                100,
-                (path, basicFileAttributes) -> {
-                    File file = path.toFile();
-                    return file.getName().equalsIgnoreCase(fileName);
-        });
+
+        Optional<Path> filePath = findFile(root, fileName);
 
         try (BufferedReader br = new BufferedReader(
                 new FileReader(
-                        filePath.findFirst()
-                                .orElseThrow(FileNotFoundException::new)
+                        filePath.orElseThrow(FileNotFoundException::new)
                                 .toString()))) {
 
             while ((line = br.readLine()) != null) {
@@ -48,5 +41,23 @@ public class FileUtil {
         }
 
         return buffer.toString();
+    }
+
+    /**
+     * Finds the first instance of the file from the root directory
+     * @param root The root directory to start searching
+     * @param fileName The name of the file to search for
+     * @return Optional value if the file was found or not
+     * @throws IOException If no matching files were found
+     */
+    public static Optional<Path> findFile(String root, String fileName) throws IOException {
+        return Files.find(
+                Paths.get(root),
+                100,
+                (path, basicFileAttributes) -> {
+                    File file = path.toFile();
+                    return file.getName().equalsIgnoreCase(fileName);
+                })
+                .findFirst();
     }
 }
