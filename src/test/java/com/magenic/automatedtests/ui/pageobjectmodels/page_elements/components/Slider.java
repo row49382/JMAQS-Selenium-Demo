@@ -1,6 +1,5 @@
 package com.magenic.automatedtests.ui.pageobjectmodels.page_elements.components;
 
-import com.magenic.jmaqs.selenium.BaseSeleniumPageModel;
 import com.magenic.jmaqs.selenium.LazyWebElement;
 import com.magenic.jmaqs.selenium.SeleniumTestObject;
 import com.magenic.jmaqs.utilities.helper.exceptions.ExecutionFailedException;
